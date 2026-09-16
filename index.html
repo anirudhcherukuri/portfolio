@@ -794,6 +794,82 @@
     padding: 2px 8px; margin-left: 8px; letter-spacing: 0.1em; vertical-align: 3px;
   }
 
+  /* ── SNAKE GAME ── */
+  .snake-sub {
+    color: var(--text-mute);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 0.1em;
+    margin-bottom: 28px;
+  }
+  .snake-wrap {
+    display: inline-block;
+    position: relative;
+    border: 1.5px solid var(--border-bright);
+    border-radius: 4px;
+    box-shadow: 0 0 30px rgba(255,0,51,0.2), inset 0 0 60px rgba(0,0,0,0.5);
+    background: #05020d;
+    overflow: hidden;
+  }
+  #snake-canvas { display: block; }
+  .snake-overlay {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    background: rgba(5,2,13,0.88);
+    transition: opacity 0.3s;
+  }
+  .snake-overlay.hidden { opacity: 0; pointer-events: none; }
+  .snake-final-score-box {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px; color: var(--text-mute);
+    letter-spacing: 0.12em; margin-bottom: 10px;
+  }
+  .snake-title-txt {
+    font-family: 'Russo One', sans-serif;
+    font-size: 26px; color: var(--white);
+    letter-spacing: 0.06em; margin-bottom: 4px;
+  }
+  .snake-title-txt span { color: var(--red); }
+  .snake-hint {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px; color: var(--text-mute);
+    letter-spacing: 0.1em; margin-bottom: 20px;
+  }
+  .snake-start-btn {
+    background: var(--red); color: #fff; border: none;
+    font-family: 'Russo One', sans-serif; font-size: 13px;
+    letter-spacing: 0.1em; padding: 10px 28px; border-radius: 2px;
+    cursor: pointer; transition: background 0.2s, box-shadow 0.2s;
+  }
+  .snake-start-btn:hover { background: var(--red-glow); box-shadow: 0 0 16px rgba(255,0,51,0.5); }
+  .snake-hud {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 6px 14px; background: var(--surface); border-top: 1px solid var(--border);
+  }
+  .snake-hud-item {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px; color: var(--text-mute); letter-spacing: 0.1em;
+  }
+  .snake-hud-item strong { color: var(--cyan); }
+  .snake-mobile-controls {
+    display: none; gap: 8px; margin-top: 16px;
+    justify-content: center; flex-direction: column; align-items: center;
+  }
+  .snake-mobile-controls .s-row { display: flex; gap: 8px; }
+  .dpad-btn {
+    width: 46px; height: 46px; background: var(--surface-2);
+    border: 1px solid var(--border-bright); color: var(--white);
+    font-size: 18px; border-radius: 4px; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    user-select: none; -webkit-tap-highlight-color: transparent; transition: background 0.15s;
+  }
+  .dpad-btn:active { background: var(--red); }
+  @media (max-width: 600px) {
+    .snake-mobile-controls { display: flex; }
+    #snake-canvas { width: 300px; height: 300px; }
+  }
+
 </style>
 </head>
 <body>
@@ -1223,6 +1299,37 @@
     </div>
   </section>
 
+  <!-- ── SNAKE GAME ── -->
+  <section class="section" id="snake-section" style="text-align:center; margin-bottom:0;">
+    <div class="section-sub">bonus stage</div>
+    <h2 class="section-title reveal" style="margin-bottom:6px;">PLAY.</h2>
+    <p class="snake-sub">// arrow keys or wasd · collect the red orbs</p>
+
+    <div class="snake-wrap">
+      <canvas id="snake-canvas" width="400" height="400"></canvas>
+      <div class="snake-overlay" id="snake-overlay">
+        <div class="snake-final-score-box" id="snake-final-score" style="display:none;">SCORE: <strong id="snake-final-num">0</strong></div>
+        <div class="snake-title-txt"><span>SN</span>AKE</div>
+        <div class="snake-hint">← → ↑ ↓ &nbsp;·&nbsp; W A S D</div>
+        <button class="snake-start-btn" id="snake-start-btn">▶ START GAME</button>
+      </div>
+      <div class="snake-hud">
+        <div class="snake-hud-item">SCORE: <strong id="snake-score">0</strong></div>
+        <div class="snake-hud-item">HIGH: <strong id="snake-high">0</strong></div>
+        <div class="snake-hud-item" id="snake-status">PRESS START</div>
+      </div>
+    </div>
+
+    <div class="snake-mobile-controls">
+      <div class="s-row"><button class="dpad-btn" id="dpad-up">▲</button></div>
+      <div class="s-row">
+        <button class="dpad-btn" id="dpad-left">◀</button>
+        <button class="dpad-btn" id="dpad-down">▼</button>
+        <button class="dpad-btn" id="dpad-right">▶</button>
+      </div>
+    </div>
+  </section>
+
   <footer class="footer">
     <div class="footer-marquee">
       <div class="footer-marquee-inner">
@@ -1411,139 +1518,6 @@ if ('ontouchstart' in window) {
 }
 </script>
 
-<!-- ── SNAKE GAME ── -->
-<style>
-  .snake-sub {
-    color: var(--text-mute);
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 12px;
-    letter-spacing: 0.1em;
-    margin-bottom: 28px;
-  }
-  .snake-wrap {
-    display: inline-block;
-    position: relative;
-    border: 1.5px solid var(--border-bright);
-    border-radius: 4px;
-    box-shadow: 0 0 30px rgba(255,0,51,0.2), inset 0 0 60px rgba(0,0,0,0.5);
-    background: #05020d;
-    overflow: hidden;
-  }
-  #snake-canvas { display: block; }
-  .snake-overlay {
-    position: absolute; inset: 0;
-    display: flex; flex-direction: column;
-    align-items: center; justify-content: center;
-    background: rgba(5,2,13,0.88);
-    transition: opacity 0.3s;
-  }
-  .snake-overlay.hidden { opacity: 0; pointer-events: none; }
-  .snake-final-score-box {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 11px;
-    color: var(--text-mute);
-    letter-spacing: 0.12em;
-    margin-bottom: 10px;
-  }
-  .snake-title-txt {
-    font-family: 'Russo One', sans-serif;
-    font-size: 26px;
-    color: var(--white);
-    letter-spacing: 0.06em;
-    margin-bottom: 4px;
-  }
-  .snake-title-txt span { color: var(--red); }
-  .snake-hint {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 11px;
-    color: var(--text-mute);
-    letter-spacing: 0.1em;
-    margin-bottom: 20px;
-  }
-  .snake-start-btn {
-    background: var(--red);
-    color: #fff;
-    border: none;
-    font-family: 'Russo One', sans-serif;
-    font-size: 13px;
-    letter-spacing: 0.1em;
-    padding: 10px 28px;
-    border-radius: 2px;
-    cursor: pointer;
-    transition: background 0.2s, box-shadow 0.2s;
-  }
-  .snake-start-btn:hover { background: var(--red-glow); box-shadow: 0 0 16px rgba(255,0,51,0.5); }
-  .snake-hud {
-    display: flex; justify-content: space-between; align-items: center;
-    padding: 6px 14px;
-    background: var(--surface);
-    border-top: 1px solid var(--border);
-  }
-  .snake-hud-item {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 11px;
-    color: var(--text-mute);
-    letter-spacing: 0.1em;
-  }
-  .snake-hud-item strong { color: var(--cyan); }
-  .snake-mobile-controls {
-    display: none;
-    gap: 8px;
-    margin-top: 16px;
-    justify-content: center;
-    flex-direction: column;
-    align-items: center;
-  }
-  .snake-mobile-controls .s-row { display: flex; gap: 8px; }
-  .dpad-btn {
-    width: 46px; height: 46px;
-    background: var(--surface-2);
-    border: 1px solid var(--border-bright);
-    color: var(--white);
-    font-size: 18px;
-    border-radius: 4px;
-    cursor: pointer;
-    display: flex; align-items: center; justify-content: center;
-    user-select: none;
-    -webkit-tap-highlight-color: transparent;
-    transition: background 0.15s;
-  }
-  .dpad-btn:active { background: var(--red); }
-  @media (max-width: 600px) {
-    .snake-mobile-controls { display: flex; }
-    #snake-canvas { width: 300px; height: 300px; }
-  }
-</style>
-
-<section class="section" id="snake-section" style="text-align:center;">
-  <div class="section-sub">bonus stage</div>
-  <h2 class="section-title reveal" style="margin-bottom:6px;">PLAY.</h2>
-  <p class="snake-sub">// arrow keys or wasd · collect the red orbs</p>
-
-  <div class="snake-wrap">
-    <canvas id="snake-canvas" width="400" height="400"></canvas>
-    <div class="snake-overlay" id="snake-overlay">
-      <div class="snake-final-score-box" id="snake-final-score" style="display:none;">SCORE: <strong id="snake-final-num">0</strong></div>
-      <div class="snake-title-txt"><span>SN</span>AKE</div>
-      <div class="snake-hint">← → ↑ ↓ &nbsp;·&nbsp; W A S D</div>
-      <button class="snake-start-btn" id="snake-start-btn">▶ START GAME</button>
-    </div>
-    <div class="snake-hud">
-      <div class="snake-hud-item">SCORE: <strong id="snake-score">0</strong></div>
-      <div class="snake-hud-item">HIGH: <strong id="snake-high">0</strong></div>
-      <div class="snake-hud-item" id="snake-status">PRESS START</div>
-    </div>
-  </div>
-
-  <div class="snake-mobile-controls">
-    <div class="s-row"><button class="dpad-btn" id="dpad-up">▲</button></div>
-    <div class="s-row">
-      <button class="dpad-btn" id="dpad-left">◀</button>
-      <button class="dpad-btn" id="dpad-down">▼</button>
-      <button class="dpad-btn" id="dpad-right">▶</button>
-    </div>
-  </div>
-</section>
 
 <script>
 (function() {
